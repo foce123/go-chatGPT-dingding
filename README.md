@@ -1,2 +1,2 @@
 # chatGPT-dingding
-go run main.go <apikey> <ddtoken>
+```go run main.go <apikey> <ddtoken>```
