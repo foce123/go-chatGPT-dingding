@@ -33,8 +33,8 @@ func JSONDecode(r io.Reader, obj interface{}) error {
 }
 
 func Handler(c *gin.Context) {
-	Apikey := os.Args[1]
-	DDToken := os.Args[2]
+	Apikey := os.Args[2]
+	DDToken := os.Args[3]
 	if strings.HasPrefix(Apikey, `sk-`) && len(DDToken) != 0 {
 		fmt.Println("key and token is right")
 	} else {
@@ -115,5 +115,5 @@ func main() {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 	r.POST("/", Handler)
-	r.Run(":8080")
+	r.Run(":" + os.Args[1])
 }
