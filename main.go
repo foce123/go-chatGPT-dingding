@@ -28,10 +28,6 @@ type Chatdata struct {
 	Messages    []map[string]string `json:"messages"`
 	Temperature float32             `json:"temperature"`
 }
-type Retdata struct {
-	Role    string `json:"role"`
-	Message string `json:"message"`
-}
 
 // keypoint
 func JSONDecode(r io.Reader, obj interface{}) error {
