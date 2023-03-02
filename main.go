@@ -23,6 +23,15 @@ type DData struct {
 type Respchat struct {
 	Choices []map[string]interface{} `json:"choices"`
 }
+type Chatdata struct {
+	Model       string              `json:"model"`
+	Messages    []map[string]string `json:"messages"`
+	Temperature float32             `json:"temperature"`
+}
+type Retdata struct {
+	Role    string `json:"role"`
+	Message string `json:"message"`
+}
 
 // keypoint
 func JSONDecode(r io.Reader, obj interface{}) error {
@@ -61,16 +70,17 @@ func Handler(c *gin.Context) {
 	ToDingding(DDToken, json.SenderID, chatdata)
 }
 
-func ReqChatGPT(apikey string, prompt string) string {
+func ReqChatGPT(apikey string, message string) string {
 	client := &http.Client{}
-	m1 := make(map[string]interface{})
-	m1["prompt"] = prompt
-	m1["max_tokens"] = 2048
-	m1["model"] = "text-davinci-003"
-	m1["temperature"] = 0.5
-	chaturl := "https://api.openai.com/v1/completions"
+	var reqchat Chatdata
+	reqchat.Model = "gpt-3.5-turbo"
+	reqchat.Temperature = 0.5
+	reqchat.Messages = []map[string]string{
+		{"role": "user", "content": message},
+	}
+	chaturl := "https://api.openai.com/v1/chat/completions"
 
-	reqData, _ := json.Marshal(m1)
+	reqData, _ := json.Marshal(reqchat)
 	req, _ := http.NewRequest("POST", chaturl, bytes.NewBuffer(reqData))
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+apikey)
@@ -84,7 +94,9 @@ func ReqChatGPT(apikey string, prompt string) string {
 	if err2 != nil {
 		fmt.Println("jchat decode err:", err2)
 	}
-	return jchat.Choices[0]["text"].(string)
+	msgdata := jchat.Choices[0]["message"].(map[string]interface{})
+	fmt.Println(msgdata["content"].(string))
+	return msgdata["content"].(string)
 }
 
 func ToDingding(ddtoken string, userid string, data string) {
