@@ -92,7 +92,13 @@ func ReqChatGPT(apikey string, message string) string {
 	}
 	msgdata := jchat.Choices[0]["message"].(map[string]interface{})
 	fmt.Println(msgdata["content"].(string))
-	return msgdata["content"].(string)
+	var nstr string
+	if strings.HasPrefix(msgdata["content"].(string), "\n\n") {
+		nstr = strings.Replace(msgdata["content"].(string), "\n\n", "", 1)
+	} else if strings.HasPrefix(msgdata["content"].(string), "?\n") {
+		nstr = strings.Replace(msgdata["content"].(string), "?\n", "", 1)
+	}
+	return nstr
 }
 
 func ToDingding(ddtoken string, userid string, data string) {
