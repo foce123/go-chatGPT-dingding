@@ -16,9 +16,9 @@ type Msg struct {
 	Text     map[string]string `json:"text"`
 }
 type DData struct {
-	At      map[string][]string `json:"at"`
-	Text    map[string]string   `json:"text"`
-	Msgtype string              `json:"msgtype"`
+	At       map[string][]string `json:"at"`
+	Markdown map[string]string   `json:"markdown"`
+	Msgtype  string              `json:"msgtype"`
 }
 type Respchat struct {
 	Choices []map[string]interface{} `json:"choices"`
@@ -92,7 +92,13 @@ func ReqChatGPT(apikey string, message string) string {
 	}
 	msgdata := jchat.Choices[0]["message"].(map[string]interface{})
 	fmt.Println(msgdata["content"].(string))
-	return msgdata["content"].(string)
+	var nstr string
+	if strings.HasPrefix(msgdata["content"].(string), "\n\n") {
+		nstr = strings.Replace(msgdata["content"].(string), "\n\n", "", 1)
+	} else if strings.HasPrefix(msgdata["content"].(string), "?\n") {
+		nstr = strings.Replace(msgdata["content"].(string), "?\n", "", 1)
+	}
+	return nstr
 }
 
 func ToDingding(ddtoken string, userid string, data string) {
@@ -101,10 +107,11 @@ func ToDingding(ddtoken string, userid string, data string) {
 	pdata.At = map[string][]string{
 		"atUserIds": {userid},
 	}
-	pdata.Text = map[string]string{
-		"content": data,
+	pdata.Markdown = map[string]string{
+		"title": "reponse-data",
+		"text":  data,
 	}
-	pdata.Msgtype = "text"
+	pdata.Msgtype = "markdown"
 	sdata, err := json.Marshal(pdata)
 	if err != nil {
 		fmt.Printf("Map to Byte_array, exception:%s\n", err)
