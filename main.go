@@ -16,9 +16,9 @@ type Msg struct {
 	Text     map[string]string `json:"text"`
 }
 type DData struct {
-	At      map[string][]string `json:"at"`
-	Text    map[string]string   `json:"text"`
-	Msgtype string              `json:"msgtype"`
+	At       map[string][]string `json:"at"`
+	Markdown map[string]string   `json:"markdown"`
+	Msgtype  string              `json:"msgtype"`
 }
 type Respchat struct {
 	Choices []map[string]interface{} `json:"choices"`
@@ -107,10 +107,11 @@ func ToDingding(ddtoken string, userid string, data string) {
 	pdata.At = map[string][]string{
 		"atUserIds": {userid},
 	}
-	pdata.Text = map[string]string{
-		"content": data,
+	pdata.Markdown = map[string]string{
+		"title": "reponse-data",
+		"text":  data,
 	}
-	pdata.Msgtype = "text"
+	pdata.Msgtype = "markdown"
 	sdata, err := json.Marshal(pdata)
 	if err != nil {
 		fmt.Printf("Map to Byte_array, exception:%s\n", err)
