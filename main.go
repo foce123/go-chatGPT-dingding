@@ -69,7 +69,7 @@ func Handler(c *gin.Context) {
 func ReqChatGPT(apikey string, message string) string {
 	client := &http.Client{}
 	var reqchat Chatdata
-	reqchat.Model = "gpt-3.5-turbo"
+	reqchat.Model = "gpt-4"
 	reqchat.Temperature = 0.5
 	reqchat.Messages = []map[string]string{
 		{"role": "user", "content": message},
