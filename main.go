@@ -16,9 +16,10 @@ type Msg struct {
 	Text     map[string]string `json:"text"`
 }
 type DData struct {
-	At       map[string][]string `json:"at"`
-	Markdown map[string]string   `json:"markdown"`
-	Msgtype  string              `json:"msgtype"`
+	At   map[string][]string `json:"at"`
+	Text map[string]string   `json:"text"`
+	//Markdown map[string]string   `json:"markdown"`
+	Msgtype string `json:"msgtype"`
 }
 type Respchat struct {
 	Choices []map[string]interface{} `json:"choices"`
@@ -81,6 +82,7 @@ func ReqChatGPT(apikey string, message string) string {
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Authorization", "Bearer "+apikey)
 	resp, _ := client.Do(req)
+	defer resp.Body.Close()
 	body, _ := io.ReadAll(resp.Body)
 	fmt.Println(string(body))
 
@@ -92,13 +94,7 @@ func ReqChatGPT(apikey string, message string) string {
 	}
 	msgdata := jchat.Choices[0]["message"].(map[string]interface{})
 	fmt.Println(msgdata["content"].(string))
-	var nstr string
-	if strings.HasPrefix(msgdata["content"].(string), "\n\n") {
-		nstr = strings.Replace(msgdata["content"].(string), "\n\n", "", 1)
-	} else if strings.HasPrefix(msgdata["content"].(string), "?\n") {
-		nstr = strings.Replace(msgdata["content"].(string), "?\n", "", 1)
-	}
-	return nstr
+	return msgdata["content"].(string)
 }
 
 func ToDingding(ddtoken string, userid string, data string) {
@@ -107,11 +103,10 @@ func ToDingding(ddtoken string, userid string, data string) {
 	pdata.At = map[string][]string{
 		"atUserIds": {userid},
 	}
-	pdata.Markdown = map[string]string{
-		"title": "reponse-data",
-		"text":  data,
+	pdata.Text = map[string]string{
+		"content": data,
 	}
-	pdata.Msgtype = "markdown"
+	pdata.Msgtype = "text"
 	sdata, err := json.Marshal(pdata)
 	if err != nil {
 		fmt.Printf("Map to Byte_array, exception:%s\n", err)
@@ -120,10 +115,13 @@ func ToDingding(ddtoken string, userid string, data string) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("POST", dd_url+ddtoken, bytes.NewBuffer(sdata))
 	req.Header.Add("Content-Type", "application/json")
-	_, err1 := client.Do(req)
+	resp, err1 := client.Do(req)
+	defer resp.Body.Close()
 	if err1 != nil {
 		fmt.Printf("post to dingding error, exception:%s\n", err)
 	}
+	body, _ := io.ReadAll(resp.Body)
+	fmt.Println(string(body))
 }
 
 func main() {
